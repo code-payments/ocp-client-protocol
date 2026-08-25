@@ -74,5 +74,10 @@ scripts/generate-swift.sh               # refresh committed Swift
 ## Not done yet
 
 Publishing CI, a real released version, and consumption by either app. The Maven coordinates
-(`com.codeinc.opencode:ocp-client-protocol`) and the Swift module name (`OCPClientProtocol`)
-are proposals, not decisions.
+(`com.flipcash:ocp-client-protocol`) and the Swift module name (`OCPClientProtocol`) are
+proposals, not decisions.
+
+Note that the artifact coordinates and the generated namespace are deliberately different.
+The artifact publishes under `com.flipcash`; the code inside it stays in
+`com.codeinc.opencode.gen.*`, because that is what the app imports and it is set by
+`java_package` in the protos.

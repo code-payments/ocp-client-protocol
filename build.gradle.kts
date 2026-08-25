@@ -22,7 +22,9 @@ val grpcVersion = "1.83.1"
 // but do it as its own commit so the diff stays readable.
 val grpcKotlinVersion = "1.4.1"
 
-group = "com.codeinc.opencode"
+// Publishing coordinates only. The generated code keeps its com.codeinc.opencode.gen.*
+// java_package -- that is the namespace the app imports, and it is set in the protos.
+group = "com.flipcash"
 version = System.getenv("RELEASE_VERSION") ?: "0.1.0-SNAPSHOT"
 
 kotlin {
