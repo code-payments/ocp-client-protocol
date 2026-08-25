@@ -9,10 +9,15 @@ Today `code-android-app` and `code-ios-app` each vendor their own copy of these 
 generate independently. That is two copies of the contract, two generator toolchains, and no
 mechanism that makes them agree. This repo is the single generation point.
 
+It is the sibling of [`flipcash2-client-protocol`](https://github.com/code-payments/flipcash2-client-protocol).
+The two are separate packages because the contracts are independent — flipcash2 does not import
+ocp — and because they belong to different orgs once the split lands.
+
 ## Status
 
-Pilot. Nothing consumes this yet, and it has never been published to a real registry. What is
-verified is that the generated code is a drop-in replacement for what the apps produce now:
+Pilot. It has never been published to a real registry, and neither app depends on it on a
+branch. What is verified is that the generated code is a drop-in replacement for what the apps
+produce now:
 
 | Output | Files | Compared against | Result |
 |---|---|---|---|
@@ -25,6 +30,10 @@ apps migrate.
 
 Both artifacts also build: `swift build` compiles the SPM target, and `./gradlew build
 publishToMavenLocal` produces a 1418-class JAR under `com.codeinc.opencode.gen.*`.
+
+The consumer side is proven too. Pointing `:services:opencode` at the mavenLocal artifact and
+dropping `:definitions:opencode:models` from its classpath builds the app and passes the
+module's 603 unit tests, with `protovalidate-runtime` and coroutines arriving transitively.
 
 ## Layout
 
@@ -73,9 +82,9 @@ scripts/generate-swift.sh               # refresh committed Swift
 
 ## Not done yet
 
-Publishing CI, a real released version, and consumption by either app. The Maven coordinates
-(`com.flipcash:ocp-client-protocol`) and the Swift module name (`OCPClientProtocol`) are
-proposals, not decisions.
+Publishing CI, a real released version, and a committed dependency in either app. The Maven
+coordinates (`com.flipcash:ocp-client-protocol`) and the Swift module name (`OCPClientProtocol`)
+are proposals, not decisions.
 
 Note that the artifact coordinates and the generated namespace are deliberately different.
 The artifact publishes under `com.flipcash`; the code inside it stays in
