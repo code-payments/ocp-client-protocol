@@ -5,9 +5,9 @@ Kotlin and Swift client SDKs for the Open Code Protocol, generated from the cont
 apps consume a versioned dependency instead of vendoring `.proto` files and running protoc
 themselves.
 
-Today `code-android-app` and `code-ios-app` each vendor their own copy of these protos and
-generate independently. That is two copies of the contract, two generator toolchains, and no
-mechanism that makes them agree. This repo is the single generation point.
+`code-android-app` and `code-ios-app` used to each vendor their own copy of these protos and
+generate independently — two copies of the contract, two generator toolchains, and no mechanism
+that made them agree. This repo is the single generation point that replaced them.
 
 It is the sibling of [`flipcash2-client-protocol`](https://github.com/code-payments/flipcash2-client-protocol).
 The two are separate packages because the contracts are independent — flipcash2 does not import
@@ -15,25 +15,19 @@ ocp — and because they belong to different orgs once the split lands.
 
 ## Status
 
-Pilot. It has never been published to a real registry, and neither app depends on it on a
-branch. What is verified is that the generated code is a drop-in replacement for what the apps
-produce now:
+Released. `0.1.0` is on Maven Central and tagged for SPM. Android consumes it in
+[code-android-app#1325](https://github.com/code-payments/code-android-app/pull/1325) and iOS in
+[code-ios-app#645](https://github.com/code-payments/code-ios-app/pull/645), which together delete
+both vendored copies.
 
-| Output | Files | Compared against | Result |
-|---|---|---|---|
-| Kotlin/Java | 263 | `:definitions:opencode:models:generateDebugProto` | identical |
-| Swift | 9 | `FlipcashAPI/.../Payments/Generated` | identical |
-
-The Kotlin split matches per generator too: 4 grpc, 4 grpckt, 5 java, 119 kotlin, 131
-validate-kt. `scripts/verify-parity.sh` is that check, and it should stay green until both
-apps migrate.
-
-Both artifacts also build: `swift build` compiles the SPM target, and `./gradlew build
-publishToMavenLocal` produces a 1418-class JAR under `com.codeinc.opencode.gen.*`.
-
-The consumer side is proven too. Pointing `:services:opencode` at the mavenLocal artifact and
-dropping `:definitions:opencode:models` from its classpath builds the app and passes the
-module's 603 unit tests, with `protovalidate-runtime` and coroutines arriving transitively.
+Before the apps migrated, `scripts/verify-parity.sh` proved this repo is a drop-in replacement
+for what they generated: 263 Kotlin/Java files against
+`:definitions:opencode:models:generateDebugProto` and 9 Swift files against
+`FlipcashAPI/.../Payments/Generated`, both identical, with the Kotlin split matching per
+generator (4 grpc, 4 grpckt, 5 java, 119 kotlin, 131 validate-kt). That gate is retired with the
+copies it compared against — an app that no longer generates has no second output to disagree
+with. What guards the output now is `scripts/toolchain.env`, since a floating generator moves
+the Swift without any contract change.
 
 ## Layout
 
@@ -47,7 +41,6 @@ scripts/
   install-swift-toolchain.sh pinned generators into .tools/
   toolchain.env              the pins
   generate-swift.sh          regenerate Sources/
-  verify-parity.sh           the phase-1 gate
 ```
 
 Generated Kotlin is not committed. It is a build input to a published JAR, so the
@@ -138,9 +131,7 @@ human step, and the one that needs a DNS TXT record.
 
 ## Not done yet
 
-A real released version and a committed dependency in either app. The first `0.1.0` attempt
-reached Central and failed validation on the unpublished signing key; `0.1.0` is still unspent
-because the workflow tags only after a successful upload.
+Both consumer PRs are open, not merged.
 
 Note that the artifact coordinates and the generated namespace are deliberately different.
 The artifact publishes under `com.flipcash`; the code inside it stays in
