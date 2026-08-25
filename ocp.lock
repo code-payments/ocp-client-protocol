@@ -1,0 +1,4 @@
+# Pinned upstream contract. Regenerate with scripts/sync-protos.sh <sha>.
+upstream: code-payments/ocp-protobuf-api
+commit: 04281923635228c137cb9255b24593a468b01b4e
+subject: Add MarketCapMetrics to Mint (#62)
