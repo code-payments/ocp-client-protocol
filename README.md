@@ -26,6 +26,9 @@ implementation("com.flipcash:ocp-client-protocol:0.1.0")
 `FlipcashAPI/Package.swift` and re-exports the module, so app code still reaches these types
 through `import FlipcashAPI`.
 
+The Kotlin artifact ships its own R8 keep rules, so an Android consumer needs no protobuf keep
+rule of its own.
+
 ## What it contains
 
 Four services — `Account`, `Currency`, `Messaging`, `Transaction` — plus the shared
@@ -38,6 +41,8 @@ this package was generated from.
 proto/                       contract, synced from upstream at the SHA in ocp.lock
 proto_deps/validate/         include-path dependency, never generated
 Sources/OCPClientProtocol/   generated Swift, committed (SPM ships source)
+src/main/resources/
+  META-INF/proguard/         R8 keep rules, shipped to Kotlin consumers
 build.gradle.kts             Kotlin generation + publishing
 scripts/
   sync-protos.sh             pull upstream at a pinned SHA, re-namespace
