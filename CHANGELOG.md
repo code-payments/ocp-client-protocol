@@ -8,6 +8,48 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.4.0
+
+Synced to [`ocp-protobuf-api@82202912`](https://github.com/code-payments/ocp-protobuf-api/commit/82202912574e122bba90025fe8b292d5a3f04c05).
+
+**Breaking.** `ocp.balance.v1.Balance` had exactly one RPC and it has been replaced, so every
+consumer of the service has work to do. There is no deprecation window: `GetBalance` is gone in the
+same release that adds `GetBalances`.
+
+### Removed
+
+- `GetBalance`, along with `GetBalanceRequest` and `GetBalanceResponse`.
+
+- `GetBalancesResponse.Result.NOT_FOUND`. `OK` and `DENIED` keep `0` and `1`, so no surviving case
+  renumbers and no positional mapping shifts underneath you. What changes is that "this owner has no
+  balance" no longer has a result code: an owner with nothing to report is simply absent from
+  `balances_by_owner`. Code that branched on `NOT_FOUND` needs to branch on a missing map entry
+  instead, and code that treated a non-`OK` result as a hard failure will now see `OK` where it used
+  to see `NOT_FOUND`.
+
+### Added
+
+- `GetBalances`, a unary RPC that batches what `GetBalance` did one owner at a time.
+
+  `GetBalancesRequest` takes `repeated owners` (1 to 1024) where the old request took a single
+  `owner`, plus an optional `repeated mints` filter (up to 1024). Leaving `mints` empty returns
+  every mint each owner holds, which is the closest thing to the old behaviour.
+
+  `GetBalancesResponse` returns `map<string, OwnerBalance> balances_by_owner`, keyed by owner
+  address. Each `OwnerBalance` carries the `core_mint_value` total in quarks that the old flat
+  response returned directly, plus `map<string, MintBalance> balances_by_mint` keyed by mint
+  address for the per-mint breakdown. So the scalar total still exists, one level further down.
+
+  Like `GetBalance` before it, `GetBalancesRequest` carries no auth or signature field. It reads
+  balances for arbitrary owner accounts rather than the caller's own, so there is nothing to sign.
+
+### Migrating
+
+A single-owner call maps across mechanically: wrap the owner in `owners`, leave `mints` empty, and
+read `balances_by_owner[owner]?.core_mint_value` where you read `core_mint_value` before. Treat a
+missing entry as the old `NOT_FOUND`. The per-mint breakdown and the multi-owner batch are new
+capability, not something the old shape expressed, so nothing forces you to use either.
+
 ## 0.3.0
 
 No contract change. `ocp.lock` points at the same upstream commit as `0.2.0`, and the generated

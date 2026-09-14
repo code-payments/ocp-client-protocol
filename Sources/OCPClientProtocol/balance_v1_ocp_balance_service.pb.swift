@@ -20,35 +20,32 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-public struct Ocp_Balance_V1_GetBalanceRequest: Sendable {
+public struct Ocp_Balance_V1_GetBalancesRequest: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var owner: Ocp_Common_V1_SolanaAccountId {
-    get {return _owner ?? Ocp_Common_V1_SolanaAccountId()}
-    set {_owner = newValue}
-  }
-  /// Returns true if `owner` has been explicitly set.
-  public var hasOwner: Bool {return self._owner != nil}
-  /// Clears the value of `owner`. Subsequent reads from it will return its default value.
-  public mutating func clearOwner() {self._owner = nil}
+  /// The owner accounts to fetch balances for
+  public var owners: [Ocp_Common_V1_SolanaAccountId] = []
+
+  /// Optional filter to limit the response to balances for the provided mints.
+  /// When empty, balances for all mints held by each owner are returned.
+  public var mints: [Ocp_Common_V1_SolanaAccountId] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
-
-  fileprivate var _owner: Ocp_Common_V1_SolanaAccountId? = nil
 }
 
-public struct Ocp_Balance_V1_GetBalanceResponse: Sendable {
+public struct Ocp_Balance_V1_GetBalancesResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  public var result: Ocp_Balance_V1_GetBalanceResponse.Result = .ok
+  public var result: Ocp_Balance_V1_GetBalancesResponse.Result = .ok
 
-  public var coreMintValue: UInt64 = 0
+  /// Individual owner balances keyed by owner address
+  public var balancesByOwner: Dictionary<String,Ocp_Balance_V1_OwnerBalance> = [:]
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -56,7 +53,6 @@ public struct Ocp_Balance_V1_GetBalanceResponse: Sendable {
     public typealias RawValue = Int
     case ok // = 0
     case denied // = 1
-    case notFound // = 2
     case UNRECOGNIZED(Int)
 
     public init() {
@@ -67,7 +63,6 @@ public struct Ocp_Balance_V1_GetBalanceResponse: Sendable {
       switch rawValue {
       case 0: self = .ok
       case 1: self = .denied
-      case 2: self = .notFound
       default: self = .UNRECOGNIZED(rawValue)
       }
     }
@@ -76,16 +71,14 @@ public struct Ocp_Balance_V1_GetBalanceResponse: Sendable {
       switch self {
       case .ok: return 0
       case .denied: return 1
-      case .notFound: return 2
       case .UNRECOGNIZED(let i): return i
       }
     }
 
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    public static let allCases: [Ocp_Balance_V1_GetBalanceResponse.Result] = [
+    public static let allCases: [Ocp_Balance_V1_GetBalancesResponse.Result] = [
       .ok,
       .denied,
-      .notFound,
     ]
 
   }
@@ -93,13 +86,140 @@ public struct Ocp_Balance_V1_GetBalanceResponse: Sendable {
   public init() {}
 }
 
+public struct Ocp_Balance_V1_OwnerBalance: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The owner account the balance is for
+  public var owner: Ocp_Common_V1_SolanaAccountId {
+    get {return _owner ?? Ocp_Common_V1_SolanaAccountId()}
+    set {_owner = newValue}
+  }
+  /// Returns true if `owner` has been explicitly set.
+  public var hasOwner: Bool {return self._owner != nil}
+  /// Clears the value of `owner`. Subsequent reads from it will return its default value.
+  public mutating func clearOwner() {self._owner = nil}
+
+  /// The total core mint value, in quarks, across all balances for the owner
+  public var coreMintValue: UInt64 = 0
+
+  /// Individual balances keyed by mint address
+  public var balancesByMint: Dictionary<String,Ocp_Balance_V1_MintBalance> = [:]
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _owner: Ocp_Common_V1_SolanaAccountId? = nil
+}
+
+public struct Ocp_Balance_V1_MintBalance: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The mint the balance is for
+  public var mint: Ocp_Common_V1_SolanaAccountId {
+    get {return _mint ?? Ocp_Common_V1_SolanaAccountId()}
+    set {_mint = newValue}
+  }
+  /// Returns true if `mint` has been explicitly set.
+  public var hasMint: Bool {return self._mint != nil}
+  /// Clears the value of `mint`. Subsequent reads from it will return its default value.
+  public mutating func clearMint() {self._mint = nil}
+
+  /// The balance value, in quarks, denominated in the core mint
+  public var coreMintValue: UInt64 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _mint: Ocp_Common_V1_SolanaAccountId? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "ocp.balance.v1"
 
-extension Ocp_Balance_V1_GetBalanceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".GetBalanceRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owner\0")
+extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetBalancesRequest"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owners\0\u{1}mints\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.owners) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.mints) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.owners.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.owners, fieldNumber: 1)
+    }
+    if !self.mints.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.mints, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Ocp_Balance_V1_GetBalancesRequest, rhs: Ocp_Balance_V1_GetBalancesRequest) -> Bool {
+    if lhs.owners != rhs.owners {return false}
+    if lhs.mints != rhs.mints {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Ocp_Balance_V1_GetBalancesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetBalancesResponse"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}result\0\u{3}balances_by_owner\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.result) }()
+      case 2: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_OwnerBalance>.self, value: &self.balancesByOwner) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.result != .ok {
+      try visitor.visitSingularEnumField(value: self.result, fieldNumber: 1)
+    }
+    if !self.balancesByOwner.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_OwnerBalance>.self, value: self.balancesByOwner, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Ocp_Balance_V1_GetBalancesResponse, rhs: Ocp_Balance_V1_GetBalancesResponse) -> Bool {
+    if lhs.result != rhs.result {return false}
+    if lhs.balancesByOwner != rhs.balancesByOwner {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Ocp_Balance_V1_GetBalancesResponse.Result: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0OK\0\u{1}DENIED\0")
+}
+
+extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".OwnerBalance"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owner\0\u{3}core_mint_value\0\u{3}balances_by_mint\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -108,6 +228,8 @@ extension Ocp_Balance_V1_GetBalanceRequest: SwiftProtobuf.Message, SwiftProtobuf
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularMessageField(value: &self._owner) }()
+      case 2: try { try decoder.decodeSingularUInt64Field(value: &self.coreMintValue) }()
+      case 3: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_MintBalance>.self, value: &self.balancesByMint) }()
       default: break
       }
     }
@@ -121,19 +243,27 @@ extension Ocp_Balance_V1_GetBalanceRequest: SwiftProtobuf.Message, SwiftProtobuf
     try { if let v = self._owner {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
+    if self.coreMintValue != 0 {
+      try visitor.visitSingularUInt64Field(value: self.coreMintValue, fieldNumber: 2)
+    }
+    if !self.balancesByMint.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_MintBalance>.self, value: self.balancesByMint, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Ocp_Balance_V1_GetBalanceRequest, rhs: Ocp_Balance_V1_GetBalanceRequest) -> Bool {
+  public static func ==(lhs: Ocp_Balance_V1_OwnerBalance, rhs: Ocp_Balance_V1_OwnerBalance) -> Bool {
     if lhs._owner != rhs._owner {return false}
+    if lhs.coreMintValue != rhs.coreMintValue {return false}
+    if lhs.balancesByMint != rhs.balancesByMint {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Ocp_Balance_V1_GetBalanceResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".GetBalanceResponse"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}result\0\u{3}core_mint_value\0")
+extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MintBalance"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mint\0\u{3}core_mint_value\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -141,7 +271,7 @@ extension Ocp_Balance_V1_GetBalanceResponse: SwiftProtobuf.Message, SwiftProtobu
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularEnumField(value: &self.result) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._mint) }()
       case 2: try { try decoder.decodeSingularUInt64Field(value: &self.coreMintValue) }()
       default: break
       }
@@ -149,23 +279,23 @@ extension Ocp_Balance_V1_GetBalanceResponse: SwiftProtobuf.Message, SwiftProtobu
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.result != .ok {
-      try visitor.visitSingularEnumField(value: self.result, fieldNumber: 1)
-    }
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._mint {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
     if self.coreMintValue != 0 {
       try visitor.visitSingularUInt64Field(value: self.coreMintValue, fieldNumber: 2)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Ocp_Balance_V1_GetBalanceResponse, rhs: Ocp_Balance_V1_GetBalanceResponse) -> Bool {
-    if lhs.result != rhs.result {return false}
+  public static func ==(lhs: Ocp_Balance_V1_MintBalance, rhs: Ocp_Balance_V1_MintBalance) -> Bool {
+    if lhs._mint != rhs._mint {return false}
     if lhs.coreMintValue != rhs.coreMintValue {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
-}
-
-extension Ocp_Balance_V1_GetBalanceResponse.Result: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0OK\0\u{1}DENIED\0\u{1}NOT_FOUND\0")
 }
