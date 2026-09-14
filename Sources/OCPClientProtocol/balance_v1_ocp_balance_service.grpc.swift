@@ -20,21 +20,21 @@ public enum Ocp_Balance_V1_Balance {
     public static let descriptor = GRPCCore.ServiceDescriptor(fullyQualifiedService: "ocp.balance.v1.Balance")
     /// Namespace for method metadata.
     public enum Method {
-        /// Namespace for "GetBalance" metadata.
-        public enum GetBalance {
-            /// Request type for "GetBalance".
-            public typealias Input = Ocp_Balance_V1_GetBalanceRequest
-            /// Response type for "GetBalance".
-            public typealias Output = Ocp_Balance_V1_GetBalanceResponse
-            /// Descriptor for "GetBalance".
+        /// Namespace for "GetBalances" metadata.
+        public enum GetBalances {
+            /// Request type for "GetBalances".
+            public typealias Input = Ocp_Balance_V1_GetBalancesRequest
+            /// Response type for "GetBalances".
+            public typealias Output = Ocp_Balance_V1_GetBalancesResponse
+            /// Descriptor for "GetBalances".
             public static let descriptor = GRPCCore.MethodDescriptor(
                 service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "ocp.balance.v1.Balance"),
-                method: "GetBalance"
+                method: "GetBalances"
             )
         }
         /// Descriptors for all methods in the "ocp.balance.v1.Balance" service.
         public static let descriptors: [GRPCCore.MethodDescriptor] = [
-            GetBalance.descriptor
+            GetBalances.descriptor
         ]
     }
 }
@@ -54,27 +54,28 @@ extension Ocp_Balance_V1_Balance {
     /// You don't need to implement this protocol directly, use the generated
     /// implementation, ``Client``.
     public protocol ClientProtocol: Sendable {
-        /// Call the "GetBalance" method.
+        /// Call the "GetBalances" method.
         ///
         /// > Source IDL Documentation:
         /// >
-        /// > GetBalance returns balance data for any owner account
+        /// > GetBalances returns balance data for a set of owner accounts, optionally
+        /// > filtered by a set of mints
         ///
         /// - Parameters:
-        ///   - request: A request containing a single `Ocp_Balance_V1_GetBalanceRequest` message.
-        ///   - serializer: A serializer for `Ocp_Balance_V1_GetBalanceRequest` messages.
-        ///   - deserializer: A deserializer for `Ocp_Balance_V1_GetBalanceResponse` messages.
+        ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
+        ///   - serializer: A serializer for `Ocp_Balance_V1_GetBalancesRequest` messages.
+        ///   - deserializer: A deserializer for `Ocp_Balance_V1_GetBalancesResponse` messages.
         ///   - options: Options to apply to this RPC.
         ///   - handleResponse: A closure which handles the response, the result of which is
         ///       returned to the caller. Returning from the closure will cancel the RPC if it
         ///       hasn't already finished.
         /// - Returns: The result of `handleResponse`.
-        func getBalance<Result>(
-            request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalanceRequest>,
-            serializer: some GRPCCore.MessageSerializer<Ocp_Balance_V1_GetBalanceRequest>,
-            deserializer: some GRPCCore.MessageDeserializer<Ocp_Balance_V1_GetBalanceResponse>,
+        func getBalances<Result>(
+            request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalancesRequest>,
+            serializer: some GRPCCore.MessageSerializer<Ocp_Balance_V1_GetBalancesRequest>,
+            deserializer: some GRPCCore.MessageDeserializer<Ocp_Balance_V1_GetBalancesResponse>,
             options: GRPCCore.CallOptions,
-            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalanceResponse>) async throws -> Result
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalancesResponse>) async throws -> Result
         ) async throws -> Result where Result: Sendable
     }
 
@@ -94,33 +95,34 @@ extension Ocp_Balance_V1_Balance {
             self.client = client
         }
 
-        /// Call the "GetBalance" method.
+        /// Call the "GetBalances" method.
         ///
         /// > Source IDL Documentation:
         /// >
-        /// > GetBalance returns balance data for any owner account
+        /// > GetBalances returns balance data for a set of owner accounts, optionally
+        /// > filtered by a set of mints
         ///
         /// - Parameters:
-        ///   - request: A request containing a single `Ocp_Balance_V1_GetBalanceRequest` message.
-        ///   - serializer: A serializer for `Ocp_Balance_V1_GetBalanceRequest` messages.
-        ///   - deserializer: A deserializer for `Ocp_Balance_V1_GetBalanceResponse` messages.
+        ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
+        ///   - serializer: A serializer for `Ocp_Balance_V1_GetBalancesRequest` messages.
+        ///   - deserializer: A deserializer for `Ocp_Balance_V1_GetBalancesResponse` messages.
         ///   - options: Options to apply to this RPC.
         ///   - handleResponse: A closure which handles the response, the result of which is
         ///       returned to the caller. Returning from the closure will cancel the RPC if it
         ///       hasn't already finished.
         /// - Returns: The result of `handleResponse`.
-        public func getBalance<Result>(
-            request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalanceRequest>,
-            serializer: some GRPCCore.MessageSerializer<Ocp_Balance_V1_GetBalanceRequest>,
-            deserializer: some GRPCCore.MessageDeserializer<Ocp_Balance_V1_GetBalanceResponse>,
+        public func getBalances<Result>(
+            request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalancesRequest>,
+            serializer: some GRPCCore.MessageSerializer<Ocp_Balance_V1_GetBalancesRequest>,
+            deserializer: some GRPCCore.MessageDeserializer<Ocp_Balance_V1_GetBalancesResponse>,
             options: GRPCCore.CallOptions = .defaults,
-            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalanceResponse>) async throws -> Result = { response in
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalancesResponse>) async throws -> Result = { response in
                 try response.message
             }
         ) async throws -> Result where Result: Sendable {
             try await self.client.unary(
                 request: request,
-                descriptor: Ocp_Balance_V1_Balance.Method.GetBalance.descriptor,
+                descriptor: Ocp_Balance_V1_Balance.Method.GetBalances.descriptor,
                 serializer: serializer,
                 deserializer: deserializer,
                 options: options,
@@ -133,30 +135,31 @@ extension Ocp_Balance_V1_Balance {
 // Helpers providing default arguments to 'ClientProtocol' methods.
 @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
 extension Ocp_Balance_V1_Balance.ClientProtocol {
-    /// Call the "GetBalance" method.
+    /// Call the "GetBalances" method.
     ///
     /// > Source IDL Documentation:
     /// >
-    /// > GetBalance returns balance data for any owner account
+    /// > GetBalances returns balance data for a set of owner accounts, optionally
+    /// > filtered by a set of mints
     ///
     /// - Parameters:
-    ///   - request: A request containing a single `Ocp_Balance_V1_GetBalanceRequest` message.
+    ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
     ///   - options: Options to apply to this RPC.
     ///   - handleResponse: A closure which handles the response, the result of which is
     ///       returned to the caller. Returning from the closure will cancel the RPC if it
     ///       hasn't already finished.
     /// - Returns: The result of `handleResponse`.
-    public func getBalance<Result>(
-        request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalanceRequest>,
+    public func getBalances<Result>(
+        request: GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalancesRequest>,
         options: GRPCCore.CallOptions = .defaults,
-        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalanceResponse>) async throws -> Result = { response in
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalancesResponse>) async throws -> Result = { response in
             try response.message
         }
     ) async throws -> Result where Result: Sendable {
-        try await self.getBalance(
+        try await self.getBalances(
             request: request,
-            serializer: GRPCProtobuf.ProtobufSerializer<Ocp_Balance_V1_GetBalanceRequest>(),
-            deserializer: GRPCProtobuf.ProtobufDeserializer<Ocp_Balance_V1_GetBalanceResponse>(),
+            serializer: GRPCProtobuf.ProtobufSerializer<Ocp_Balance_V1_GetBalancesRequest>(),
+            deserializer: GRPCProtobuf.ProtobufDeserializer<Ocp_Balance_V1_GetBalancesResponse>(),
             options: options,
             onResponse: handleResponse
         )
@@ -166,11 +169,12 @@ extension Ocp_Balance_V1_Balance.ClientProtocol {
 // Helpers providing sugared APIs for 'ClientProtocol' methods.
 @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
 extension Ocp_Balance_V1_Balance.ClientProtocol {
-    /// Call the "GetBalance" method.
+    /// Call the "GetBalances" method.
     ///
     /// > Source IDL Documentation:
     /// >
-    /// > GetBalance returns balance data for any owner account
+    /// > GetBalances returns balance data for a set of owner accounts, optionally
+    /// > filtered by a set of mints
     ///
     /// - Parameters:
     ///   - message: request message to send.
@@ -180,19 +184,19 @@ extension Ocp_Balance_V1_Balance.ClientProtocol {
     ///       returned to the caller. Returning from the closure will cancel the RPC if it
     ///       hasn't already finished.
     /// - Returns: The result of `handleResponse`.
-    public func getBalance<Result>(
-        _ message: Ocp_Balance_V1_GetBalanceRequest,
+    public func getBalances<Result>(
+        _ message: Ocp_Balance_V1_GetBalancesRequest,
         metadata: GRPCCore.Metadata = [:],
         options: GRPCCore.CallOptions = .defaults,
-        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalanceResponse>) async throws -> Result = { response in
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<Ocp_Balance_V1_GetBalancesResponse>) async throws -> Result = { response in
             try response.message
         }
     ) async throws -> Result where Result: Sendable {
-        let request = GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalanceRequest>(
+        let request = GRPCCore.ClientRequest<Ocp_Balance_V1_GetBalancesRequest>(
             message: message,
             metadata: metadata
         )
-        return try await self.getBalance(
+        return try await self.getBalances(
             request: request,
             options: options,
             onResponse: handleResponse
