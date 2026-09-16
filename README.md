@@ -35,6 +35,28 @@ Four services — `Account`, `Currency`, `Messaging`, `Transaction` — plus the
 `common/v1/model.proto`. The contract is owned upstream; `ocp.lock` records which commit of it
 this package was generated from.
 
+## Knowing what you built against
+
+Both generated clients carry the package version and the upstream commit they were
+generated from:
+
+```kotlin
+OcpContractInfo.VERSION           // "0.4.0"
+OcpContractInfo.shortProtoCommit  // "82202912", or "LOCAL"
+```
+
+```swift
+OCPContractInfo.version           // "0.4.0"
+OCPContractInfo.shortProtoCommit  // "82202912", or "LOCAL"
+```
+
+A build on a local proto sync reports `LOCAL` for the commit, because that is what
+`sync-protos.sh --local` writes to `ocp.lock` and both generators read it from there.
+`isLocal` is the flag to branch on.
+
+The Swift file's version reads `<next>-dev` on `main`. `publish.yml` stamps the real
+number into the commit it tags, so a resolved SPM tag always carries a released version.
+
 ## Layout
 
 ```
