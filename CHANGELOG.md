@@ -8,6 +8,34 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.6.0
+
+Synced to [`ocp-protobuf-api@e3d25a85`](https://github.com/code-payments/ocp-protobuf-api/commit/e3d25a85b1e1ce088e956714e1a71248322e215f),
+picking up [#67](https://github.com/code-payments/ocp-protobuf-api/pull/67) (docs only) and
+[#68](https://github.com/code-payments/ocp-protobuf-api/pull/68). Only `balance.v1` moved.
+
+`GetBalances` can now report fiat values alongside core-mint values. The change is opt-in per
+request, so the upgrade is free: a caller that sends no currency codes gets exactly what it got
+before.
+
+### Added
+
+- `GetBalancesRequest.currency_codes` (field 3), a `repeated string` of lowercase ISO 4217 codes
+  such as `"usd"`. At most 256, no duplicates, each matching `^[a-z]{3,4}$`. Empty means core-mint
+  values only.
+- `OwnerBalance.fiat_values_by_currency` (field 4), a `map<string, double>` holding the owner's
+  total across all balances, keyed by currency code.
+- `MintBalance.fiat_values_by_currency` (field 3), the same map for a single mint's balance.
+
+Both maps are populated only for the codes the request asked for. A code the caller did not request
+is absent, not zero.
+
+### Unchanged
+
+Nothing was renumbered, and nothing existing changed type or meaning. The new fields take the next
+free number in each message. No service, RPC, message or enum case was removed. Everything else in
+the diff is comments.
+
 ## 0.5.0
 
 No contract change. Still synced to
