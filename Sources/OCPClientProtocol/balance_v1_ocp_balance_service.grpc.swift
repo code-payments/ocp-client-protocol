@@ -59,7 +59,8 @@ extension Ocp_Balance_V1_Balance {
         /// > Source IDL Documentation:
         /// >
         /// > GetBalances returns balance data for a set of owner accounts, optionally
-        /// > filtered by a set of mints
+        /// > filtered by a set of mints. Balances are always denominated in the core
+        /// > mint, and can additionally be denominated in a set of fiat currencies.
         ///
         /// - Parameters:
         ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
@@ -100,7 +101,8 @@ extension Ocp_Balance_V1_Balance {
         /// > Source IDL Documentation:
         /// >
         /// > GetBalances returns balance data for a set of owner accounts, optionally
-        /// > filtered by a set of mints
+        /// > filtered by a set of mints. Balances are always denominated in the core
+        /// > mint, and can additionally be denominated in a set of fiat currencies.
         ///
         /// - Parameters:
         ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
@@ -140,7 +142,8 @@ extension Ocp_Balance_V1_Balance.ClientProtocol {
     /// > Source IDL Documentation:
     /// >
     /// > GetBalances returns balance data for a set of owner accounts, optionally
-    /// > filtered by a set of mints
+    /// > filtered by a set of mints. Balances are always denominated in the core
+    /// > mint, and can additionally be denominated in a set of fiat currencies.
     ///
     /// - Parameters:
     ///   - request: A request containing a single `Ocp_Balance_V1_GetBalancesRequest` message.
@@ -174,7 +177,8 @@ extension Ocp_Balance_V1_Balance.ClientProtocol {
     /// > Source IDL Documentation:
     /// >
     /// > GetBalances returns balance data for a set of owner accounts, optionally
-    /// > filtered by a set of mints
+    /// > filtered by a set of mints. Balances are always denominated in the core
+    /// > mint, and can additionally be denominated in a set of fiat currencies.
     ///
     /// - Parameters:
     ///   - message: request message to send.

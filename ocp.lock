@@ -1,4 +1,4 @@
 # Pinned upstream contract. Regenerate with scripts/sync-protos.sh <sha>.
 upstream: code-payments/ocp-protobuf-api
-commit: 82202912574e122bba90025fe8b292d5a3f04c05
-subject: Remove GetBalance RPC in favour of GetBalances (#66)
+commit: e3d25a85b1e1ce088e956714e1a71248322e215f
+subject: GetBalance now supports balance values across many fiat currencies (#68)

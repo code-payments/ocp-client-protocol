@@ -32,6 +32,11 @@ public struct Ocp_Balance_V1_GetBalancesRequest: Sendable {
   /// When empty, balances for all mints held by each owner are returned.
   public var mints: [Ocp_Common_V1_SolanaAccountId] = []
 
+  /// Optional set of ISO 4217 alpha-3 currency codes (e.g., "usd") to also
+  /// denominate balance values in, in addition to the core mint value. When
+  /// empty, only core mint values are returned.
+  public var currencyCodes: [String] = []
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -107,6 +112,11 @@ public struct Ocp_Balance_V1_OwnerBalance: Sendable {
   /// Individual balances keyed by mint address
   public var balancesByMint: Dictionary<String,Ocp_Balance_V1_MintBalance> = [:]
 
+  /// The total fiat value across all balances for the owner, keyed by currency
+  /// code. Only populated for the currency codes requested in
+  /// GetBalancesRequest.currency_codes.
+  public var fiatValuesByCurrency: Dictionary<String,Double> = [:]
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -132,6 +142,11 @@ public struct Ocp_Balance_V1_MintBalance: Sendable {
   /// The balance value, in quarks, denominated in the core mint
   public var coreMintValue: UInt64 = 0
 
+  /// The balance value denominated in fiat, keyed by currency code. Only
+  /// populated for the currency codes requested in
+  /// GetBalancesRequest.currency_codes.
+  public var fiatValuesByCurrency: Dictionary<String,Double> = [:]
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -145,7 +160,7 @@ fileprivate let _protobuf_package = "ocp.balance.v1"
 
 extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetBalancesRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owners\0\u{1}mints\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owners\0\u{1}mints\0\u{3}currency_codes\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -155,6 +170,7 @@ extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobu
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.owners) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.mints) }()
+      case 3: try { try decoder.decodeRepeatedStringField(value: &self.currencyCodes) }()
       default: break
       }
     }
@@ -167,12 +183,16 @@ extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobu
     if !self.mints.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.mints, fieldNumber: 2)
     }
+    if !self.currencyCodes.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.currencyCodes, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Ocp_Balance_V1_GetBalancesRequest, rhs: Ocp_Balance_V1_GetBalancesRequest) -> Bool {
     if lhs.owners != rhs.owners {return false}
     if lhs.mints != rhs.mints {return false}
+    if lhs.currencyCodes != rhs.currencyCodes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -219,7 +239,7 @@ extension Ocp_Balance_V1_GetBalancesResponse.Result: SwiftProtobuf._ProtoNamePro
 
 extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".OwnerBalance"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owner\0\u{3}core_mint_value\0\u{3}balances_by_mint\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owner\0\u{3}core_mint_value\0\u{3}balances_by_mint\0\u{3}fiat_values_by_currency\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -230,6 +250,7 @@ extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._Mes
       case 1: try { try decoder.decodeSingularMessageField(value: &self._owner) }()
       case 2: try { try decoder.decodeSingularUInt64Field(value: &self.coreMintValue) }()
       case 3: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_MintBalance>.self, value: &self.balancesByMint) }()
+      case 4: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: &self.fiatValuesByCurrency) }()
       default: break
       }
     }
@@ -249,6 +270,9 @@ extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._Mes
     if !self.balancesByMint.isEmpty {
       try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString,Ocp_Balance_V1_MintBalance>.self, value: self.balancesByMint, fieldNumber: 3)
     }
+    if !self.fiatValuesByCurrency.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: self.fiatValuesByCurrency, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -256,6 +280,7 @@ extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._Mes
     if lhs._owner != rhs._owner {return false}
     if lhs.coreMintValue != rhs.coreMintValue {return false}
     if lhs.balancesByMint != rhs.balancesByMint {return false}
+    if lhs.fiatValuesByCurrency != rhs.fiatValuesByCurrency {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -263,7 +288,7 @@ extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".MintBalance"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mint\0\u{3}core_mint_value\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mint\0\u{3}core_mint_value\0\u{3}fiat_values_by_currency\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -273,6 +298,7 @@ extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._Mess
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularMessageField(value: &self._mint) }()
       case 2: try { try decoder.decodeSingularUInt64Field(value: &self.coreMintValue) }()
+      case 3: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: &self.fiatValuesByCurrency) }()
       default: break
       }
     }
@@ -289,12 +315,16 @@ extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if self.coreMintValue != 0 {
       try visitor.visitSingularUInt64Field(value: self.coreMintValue, fieldNumber: 2)
     }
+    if !self.fiatValuesByCurrency.isEmpty {
+      try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: self.fiatValuesByCurrency, fieldNumber: 3)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Ocp_Balance_V1_MintBalance, rhs: Ocp_Balance_V1_MintBalance) -> Bool {
     if lhs._mint != rhs._mint {return false}
     if lhs.coreMintValue != rhs.coreMintValue {return false}
+    if lhs.fiatValuesByCurrency != rhs.fiatValuesByCurrency {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
