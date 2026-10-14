@@ -8,6 +8,26 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.7.0
+
+Synced to [`ocp-protobuf-api@00ea80d0`](https://github.com/code-payments/ocp-protobuf-api/commit/00ea80d00cf1ce76216937b60cfd60adfd37dc99),
+picking up [#69](https://github.com/code-payments/ocp-protobuf-api/pull/69). Only `balance.v1` moved.
+
+`GetBalances` now reports each mint's balance in quarks, and can skip the per-mint breakdown when a
+caller only needs owner totals. Both are additive, so the upgrade is free.
+
+### Added
+
+- `MintBalance.quarks` (field 4), a `uint64` holding the balance of that mint in quarks.
+- `GetBalancesRequest.exclude_per_mint_balances` (field 4), a `bool`. When true,
+  `OwnerBalance.balances_by_mint` comes back empty. Owner totals are unaffected and still count
+  every mint matching the `mints` filter. The default, false, keeps today's response.
+
+### Unchanged
+
+Nothing was renumbered, and nothing existing changed type or meaning. No service, RPC, message or
+enum case was removed. Everything else in the diff is comments.
+
 ## 0.6.0
 
 Synced to [`ocp-protobuf-api@e3d25a85`](https://github.com/code-payments/ocp-protobuf-api/commit/e3d25a85b1e1ce088e956714e1a71248322e215f),

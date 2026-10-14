@@ -37,6 +37,10 @@ public struct Ocp_Balance_V1_GetBalancesRequest: Sendable {
   /// empty, only core mint values are returned.
   public var currencyCodes: [String] = []
 
+  /// When true, OwnerBalance.balances_by_mint is not populated. Owner totals
+  /// are unaffected and still account for every mint matching the mints filter.
+  public var excludePerMintBalances: Bool = false
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -109,7 +113,8 @@ public struct Ocp_Balance_V1_OwnerBalance: Sendable {
   /// The total core mint value, in quarks, across all balances for the owner
   public var coreMintValue: UInt64 = 0
 
-  /// Individual balances keyed by mint address
+  /// Individual balances keyed by mint address. Not populated when
+  /// GetBalancesRequest.exclude_per_mint_balances is true.
   public var balancesByMint: Dictionary<String,Ocp_Balance_V1_MintBalance> = [:]
 
   /// The total fiat value across all balances for the owner, keyed by currency
@@ -147,6 +152,9 @@ public struct Ocp_Balance_V1_MintBalance: Sendable {
   /// GetBalancesRequest.currency_codes.
   public var fiatValuesByCurrency: Dictionary<String,Double> = [:]
 
+  /// The balance amount, in quarks, of the mint the balance is for
+  public var quarks: UInt64 = 0
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -160,7 +168,7 @@ fileprivate let _protobuf_package = "ocp.balance.v1"
 
 extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetBalancesRequest"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owners\0\u{1}mints\0\u{3}currency_codes\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}owners\0\u{1}mints\0\u{3}currency_codes\0\u{3}exclude_per_mint_balances\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -171,6 +179,7 @@ extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobu
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.owners) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.mints) }()
       case 3: try { try decoder.decodeRepeatedStringField(value: &self.currencyCodes) }()
+      case 4: try { try decoder.decodeSingularBoolField(value: &self.excludePerMintBalances) }()
       default: break
       }
     }
@@ -186,6 +195,9 @@ extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobu
     if !self.currencyCodes.isEmpty {
       try visitor.visitRepeatedStringField(value: self.currencyCodes, fieldNumber: 3)
     }
+    if self.excludePerMintBalances != false {
+      try visitor.visitSingularBoolField(value: self.excludePerMintBalances, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -193,6 +205,7 @@ extension Ocp_Balance_V1_GetBalancesRequest: SwiftProtobuf.Message, SwiftProtobu
     if lhs.owners != rhs.owners {return false}
     if lhs.mints != rhs.mints {return false}
     if lhs.currencyCodes != rhs.currencyCodes {return false}
+    if lhs.excludePerMintBalances != rhs.excludePerMintBalances {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -288,7 +301,7 @@ extension Ocp_Balance_V1_OwnerBalance: SwiftProtobuf.Message, SwiftProtobuf._Mes
 
 extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".MintBalance"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mint\0\u{3}core_mint_value\0\u{3}fiat_values_by_currency\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mint\0\u{3}core_mint_value\0\u{3}fiat_values_by_currency\0\u{1}quarks\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -299,6 +312,7 @@ extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._Mess
       case 1: try { try decoder.decodeSingularMessageField(value: &self._mint) }()
       case 2: try { try decoder.decodeSingularUInt64Field(value: &self.coreMintValue) }()
       case 3: try { try decoder.decodeMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: &self.fiatValuesByCurrency) }()
+      case 4: try { try decoder.decodeSingularUInt64Field(value: &self.quarks) }()
       default: break
       }
     }
@@ -318,6 +332,9 @@ extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if !self.fiatValuesByCurrency.isEmpty {
       try visitor.visitMapField(fieldType: SwiftProtobuf._ProtobufMap<SwiftProtobuf.ProtobufString,SwiftProtobuf.ProtobufDouble>.self, value: self.fiatValuesByCurrency, fieldNumber: 3)
     }
+    if self.quarks != 0 {
+      try visitor.visitSingularUInt64Field(value: self.quarks, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -325,6 +342,7 @@ extension Ocp_Balance_V1_MintBalance: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if lhs._mint != rhs._mint {return false}
     if lhs.coreMintValue != rhs.coreMintValue {return false}
     if lhs.fiatValuesByCurrency != rhs.fiatValuesByCurrency {return false}
+    if lhs.quarks != rhs.quarks {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
