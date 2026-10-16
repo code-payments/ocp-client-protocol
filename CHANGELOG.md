@@ -8,6 +8,32 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.8.0
+
+Synced to [`ocp-protobuf-api@6f70c0d8`](https://github.com/code-payments/ocp-protobuf-api/commit/6f70c0d8e832531fd006bbb02fcb2c5d07e0c247),
+picking up [#70](https://github.com/code-payments/ocp-protobuf-api/pull/70). Only `transaction.v1` moved.
+
+A new intent type pays several OCP primary accounts from one intent. It is additive, so the upgrade
+is free. A client that switches over `Metadata.type` exhaustively gets one more case to handle.
+
+### Added
+
+- `SendPublicMultiPaymentMetadata`, carried as `Metadata.send_public_multi_payment` (oneof field 5).
+  It holds a `source`, a `mint`, and 2 to 10 `payments`, each one a `destination`, an optional
+  `destination_owner`, and either `server_exchange_data` or `client_exchange_data`. The intent emits
+  one `NoPrivacyTransferAction` from the source primary account per payment.
+- Every destination has to be an OCP-managed primary account for the intent's mint. Destinations
+  and their owners must be unique and must differ from the source. Every payment has to share the
+  same currency, the same verified core-mint rate and, for launchpad currencies, the same verified
+  reserve state. When a destination's owner is an existing OCP user with no primary account on the
+  mint yet, the server opens it, and `destination_owner` is required for that payment. The server
+  may cap the payment count below 10.
+
+### Unchanged
+
+Nothing was renumbered, and nothing existing changed type or meaning. No service, RPC, message or
+enum case was removed.
+
 ## 0.7.0
 
 Synced to [`ocp-protobuf-api@00ea80d0`](https://github.com/code-payments/ocp-protobuf-api/commit/00ea80d00cf1ce76216937b60cfd60adfd37dc99),

@@ -1,4 +1,4 @@
 # Pinned upstream contract. Regenerate with scripts/sync-protos.sh <sha>.
 upstream: code-payments/ocp-protobuf-api
-commit: 00ea80d00cf1ce76216937b60cfd60adfd37dc99
-subject: GetBalances now returns per-mint quarks and can exclude per-mint balances (#69)
+commit: 6f70c0d8e832531fd006bbb02fcb2c5d07e0c247
+subject: Add SendPublicMultiPaymentMetadata intent type (#70)

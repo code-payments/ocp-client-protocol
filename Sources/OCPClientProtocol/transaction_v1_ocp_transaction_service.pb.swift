@@ -2297,6 +2297,14 @@ public struct Ocp_Transaction_V1_Metadata: Sendable {
     set {type = .publicDistribution(newValue)}
   }
 
+  public var sendPublicMultiPayment: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata {
+    get {
+      if case .sendPublicMultiPayment(let v)? = type {return v}
+      return Ocp_Transaction_V1_SendPublicMultiPaymentMetadata()
+    }
+    set {type = .sendPublicMultiPayment(newValue)}
+  }
+
   /// Optional app-level metadata
   public var appMetadata: Ocp_Transaction_V1_AppMetadata {
     get {return _appMetadata ?? Ocp_Transaction_V1_AppMetadata()}
@@ -2314,6 +2322,7 @@ public struct Ocp_Transaction_V1_Metadata: Sendable {
     case sendPublicPayment(Ocp_Transaction_V1_SendPublicPaymentMetadata)
     case receivePaymentsPublicly(Ocp_Transaction_V1_ReceivePaymentsPubliclyMetadata)
     case publicDistribution(Ocp_Transaction_V1_PublicDistributionMetadata)
+    case sendPublicMultiPayment(Ocp_Transaction_V1_SendPublicMultiPaymentMetadata)
 
   }
 
@@ -2639,6 +2648,131 @@ public struct Ocp_Transaction_V1_PublicDistributionMetadata: Sendable {
     public init() {}
 
     fileprivate var _destination: Ocp_Common_V1_SolanaAccountId? = nil
+  }
+
+  public init() {}
+
+  fileprivate var _source: Ocp_Common_V1_SolanaAccountId? = nil
+  fileprivate var _mint: Ocp_Common_V1_SolanaAccountId? = nil
+}
+
+/// Send payments publicly from the user's primary account to multiple OCP
+/// primary accounts.
+///
+/// Action Spec:
+///
+/// for payment in payments
+///   actions.push_back(NoPrivacyTransferAction(PRIMARY, payment.destination, payment.ExchangeData.Quarks))
+///
+/// Notes:
+///  - Every destination must be a PRIMARY account of the intent mint that is
+///    managed by OCP. Withdrawals, indirect sends and fee payments are not
+///    supported.
+///  - If a destination owner is an existing OCP user without a PRIMARY account
+///    on the intent mint, the server auto-opens it as part of the intent. The
+///    destination must be the owner's derived PRIMARY timelock vault for the
+///    intent mint, and destination_owner must be provided.
+///  - Destinations, and the owners of destinations, must be unique and cannot
+///    be the source or its owner.
+///  - Every payment's client exchange data must use the same currency, verified
+///    core mint fiat exchange rate and, for launchpad currencies, verified
+///    reserve state.
+///  - The server may enforce a lower maximum number of payments than allowed
+///    by validation here.
+public struct Ocp_Transaction_V1_SendPublicMultiPaymentMetadata: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The source account where funds will be sent from. Currently, this is always
+  /// the user's primary account.
+  public var source: Ocp_Common_V1_SolanaAccountId {
+    get {return _source ?? Ocp_Common_V1_SolanaAccountId()}
+    set {_source = newValue}
+  }
+  /// Returns true if `source` has been explicitly set.
+  public var hasSource: Bool {return self._source != nil}
+  /// Clears the value of `source`. Subsequent reads from it will return its default value.
+  public mutating func clearSource() {self._source = nil}
+
+  /// The set of payments
+  public var payments: [Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.Payment] = []
+
+  /// The mint that this intent will be operating against
+  public var mint: Ocp_Common_V1_SolanaAccountId {
+    get {return _mint ?? Ocp_Common_V1_SolanaAccountId()}
+    set {_mint = newValue}
+  }
+  /// Returns true if `mint` has been explicitly set.
+  public var hasMint: Bool {return self._mint != nil}
+  /// Clears the value of `mint`. Subsequent reads from it will return its default value.
+  public mutating func clearMint() {self._mint = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public struct Payment: Sendable {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// The destination primary account to send funds to
+    public var destination: Ocp_Common_V1_SolanaAccountId {
+      get {return _destination ?? Ocp_Common_V1_SolanaAccountId()}
+      set {_destination = newValue}
+    }
+    /// Returns true if `destination` has been explicitly set.
+    public var hasDestination: Bool {return self._destination != nil}
+    /// Clears the value of `destination`. Subsequent reads from it will return its default value.
+    public mutating func clearDestination() {self._destination = nil}
+
+    /// The owner of the destination account, which is required when the
+    /// destination PRIMARY account doesn't exist yet and will be auto-opened.
+    /// It can be omitted when the destination already exists.
+    public var destinationOwner: Ocp_Common_V1_SolanaAccountId {
+      get {return _destinationOwner ?? Ocp_Common_V1_SolanaAccountId()}
+      set {_destinationOwner = newValue}
+    }
+    /// Returns true if `destinationOwner` has been explicitly set.
+    public var hasDestinationOwner: Bool {return self._destinationOwner != nil}
+    /// Clears the value of `destinationOwner`. Subsequent reads from it will return its default value.
+    public mutating func clearDestinationOwner() {self._destinationOwner = nil}
+
+    /// The exchange data of funds being sent to the destination
+    public var exchangeData: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.Payment.OneOf_ExchangeData? = nil
+
+    /// Provided by server for submitted intents
+    public var serverExchangeData: Ocp_Transaction_V1_ExchangeData {
+      get {
+        if case .serverExchangeData(let v)? = exchangeData {return v}
+        return Ocp_Transaction_V1_ExchangeData()
+      }
+      set {exchangeData = .serverExchangeData(newValue)}
+    }
+
+    /// Provided by clients when submitting new intents
+    public var clientExchangeData: Ocp_Transaction_V1_VerifiedExchangeData {
+      get {
+        if case .clientExchangeData(let v)? = exchangeData {return v}
+        return Ocp_Transaction_V1_VerifiedExchangeData()
+      }
+      set {exchangeData = .clientExchangeData(newValue)}
+    }
+
+    public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    /// The exchange data of funds being sent to the destination
+    public enum OneOf_ExchangeData: Equatable, Sendable {
+      /// Provided by server for submitted intents
+      case serverExchangeData(Ocp_Transaction_V1_ExchangeData)
+      /// Provided by clients when submitting new intents
+      case clientExchangeData(Ocp_Transaction_V1_VerifiedExchangeData)
+
+    }
+
+    public init() {}
+
+    fileprivate var _destination: Ocp_Common_V1_SolanaAccountId? = nil
+    fileprivate var _destinationOwner: Ocp_Common_V1_SolanaAccountId? = nil
   }
 
   public init() {}
@@ -5867,7 +6001,7 @@ extension Ocp_Transaction_V1_GetPendingSwapsResponse.Result: SwiftProtobuf._Prot
 
 extension Ocp_Transaction_V1_Metadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Metadata"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}open_accounts\0\u{3}send_public_payment\0\u{3}receive_payments_publicly\0\u{3}public_distribution\0\u{4}\u{6}app_metadata\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}open_accounts\0\u{3}send_public_payment\0\u{3}receive_payments_publicly\0\u{3}public_distribution\0\u{3}send_public_multi_payment\0\u{4}\u{5}app_metadata\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -5927,6 +6061,19 @@ extension Ocp_Transaction_V1_Metadata: SwiftProtobuf.Message, SwiftProtobuf._Mes
           self.type = .publicDistribution(v)
         }
       }()
+      case 5: try {
+        var v: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata?
+        var hadOneofValue = false
+        if let current = self.type {
+          hadOneofValue = true
+          if case .sendPublicMultiPayment(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.type = .sendPublicMultiPayment(v)
+        }
+      }()
       case 10: try { try decoder.decodeSingularMessageField(value: &self._appMetadata) }()
       default: break
       }
@@ -5954,6 +6101,10 @@ extension Ocp_Transaction_V1_Metadata: SwiftProtobuf.Message, SwiftProtobuf._Mes
     case .publicDistribution?: try {
       guard case .publicDistribution(let v)? = self.type else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .sendPublicMultiPayment?: try {
+      guard case .sendPublicMultiPayment(let v)? = self.type else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     }()
     case nil: break
     }
@@ -6286,6 +6437,127 @@ extension Ocp_Transaction_V1_PublicDistributionMetadata.Distribution: SwiftProto
   public static func ==(lhs: Ocp_Transaction_V1_PublicDistributionMetadata.Distribution, rhs: Ocp_Transaction_V1_PublicDistributionMetadata.Distribution) -> Bool {
     if lhs._destination != rhs._destination {return false}
     if lhs.quarks != rhs.quarks {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Ocp_Transaction_V1_SendPublicMultiPaymentMetadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SendPublicMultiPaymentMetadata"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}source\0\u{1}payments\0\u{1}mint\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._source) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.payments) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._mint) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._source {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.payments.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.payments, fieldNumber: 2)
+    }
+    try { if let v = self._mint {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata, rhs: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata) -> Bool {
+    if lhs._source != rhs._source {return false}
+    if lhs.payments != rhs.payments {return false}
+    if lhs._mint != rhs._mint {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.Payment: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.protoMessageName + ".Payment"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}destination\0\u{3}destination_owner\0\u{3}server_exchange_data\0\u{3}client_exchange_data\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._destination) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._destinationOwner) }()
+      case 3: try {
+        var v: Ocp_Transaction_V1_ExchangeData?
+        var hadOneofValue = false
+        if let current = self.exchangeData {
+          hadOneofValue = true
+          if case .serverExchangeData(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.exchangeData = .serverExchangeData(v)
+        }
+      }()
+      case 4: try {
+        var v: Ocp_Transaction_V1_VerifiedExchangeData?
+        var hadOneofValue = false
+        if let current = self.exchangeData {
+          hadOneofValue = true
+          if case .clientExchangeData(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.exchangeData = .clientExchangeData(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._destination {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._destinationOwner {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    switch self.exchangeData {
+    case .serverExchangeData?: try {
+      guard case .serverExchangeData(let v)? = self.exchangeData else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .clientExchangeData?: try {
+      guard case .clientExchangeData(let v)? = self.exchangeData else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.Payment, rhs: Ocp_Transaction_V1_SendPublicMultiPaymentMetadata.Payment) -> Bool {
+    if lhs._destination != rhs._destination {return false}
+    if lhs._destinationOwner != rhs._destinationOwner {return false}
+    if lhs.exchangeData != rhs.exchangeData {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
