@@ -2,7 +2,7 @@
 
 public enum OCPContractInfo {
     public static let version = "0.7.0-dev"
-    public static let protoCommit = "00ea80d00cf1ce76216937b60cfd60adfd37dc99"
+    public static let protoCommit = "6f70c0d8e832531fd006bbb02fcb2c5d07e0c247"
 
     public static var isLocal: Bool { protoCommit == localSentinel }
 
