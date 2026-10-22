@@ -1038,6 +1038,11 @@ public struct Ocp_Transaction_V1_StatefulSwapRequest: Sendable {
       /// CanWithdrawToAccountResponse.fee_amount
       public var feeAmount: UInt64 = 0
 
+      /// The CoinbaseStableSwapper swap instruction version the client will
+      /// use when constructing the transaction. 2 uses SwapV2. Any other value,
+      /// including unset, uses the legacy Swap instruction.
+      public var swapVersion: UInt32 = 0
+
       public var unknownFields = SwiftProtobuf.UnknownStorage()
 
       public init() {}
@@ -1462,7 +1467,7 @@ public struct Ocp_Transaction_V1_StatefulSwapResponse: Sendable {
     ///  5. AssociatedTokenAccount::CreateIdempotent (open swap authority's from_mint ATA)
     ///  6. AssociatedTokenAccount::CreateIdempotent (open destination owner's to_mint ATA)
     ///  7. VM::TransferForSwapWithFee (from_mint VM swap ATA -> swap authority's from_mint ATA (swap amount) and fee destination (fee amount))
-    ///  8. CoinbaseStableSwapper::Swap (from_mint swap authority ATA -> to_mint destination owner ATA)
+    ///  8. CoinbaseStableSwapper::Swap or CoinbaseStableSwapper::SwapV2, per client swap_version (from_mint swap authority ATA -> to_mint destination owner ATA)
     ///  9. Token::CloseAccount (closes swap authority's from_mint ATA)
     public struct CoinbaseStableSwapperServerParameter: Sendable {
       // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -1766,6 +1771,11 @@ public struct Ocp_Transaction_V1_StatelessSwapRequest: Sendable {
       /// The amount to swap from the source mint in quarks.
       public var swapAmount: UInt64 = 0
 
+      /// The CoinbaseStableSwapper swap instruction version the client will
+      /// use when constructing the transaction. 2 uses SwapV2. Any other value,
+      /// including unset, uses the legacy Swap instruction.
+      public var swapVersion: UInt32 = 0
+
       public var unknownFields = SwiftProtobuf.UnknownStorage()
 
       public init() {}
@@ -1868,7 +1878,7 @@ public struct Ocp_Transaction_V1_StatelessSwapResponse: Sendable {
     ///  2. [Optional] ComputeBudget::SetComputeUnitPrice
     ///  3. [Optional] Memo::Memo
     ///  4. AssociatedTokenAccount::CreateIdempotent (open owner's to_mint VM Deposit ATA)
-    ///  5. CoinbaseStableSwapper::Swap (owner's from_mint ATA -> owner's to_mint VM Deposit ATA)
+    ///  5. CoinbaseStableSwapper::Swap or CoinbaseStableSwapper::SwapV2, per client swap_version (owner's from_mint ATA -> owner's to_mint VM Deposit ATA)
     public struct CoinbaseStableSwapperServerParameter: Sendable {
       // SwiftProtobuf.Message conformance is added in an extension below. See the
       // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -4756,7 +4766,7 @@ extension Ocp_Transaction_V1_StatefulSwapRequest.Initiate.ReserveSwapClientParam
 
 extension Ocp_Transaction_V1_StatefulSwapRequest.Initiate.CoinbaseStableSwapperClientParameters: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = Ocp_Transaction_V1_StatefulSwapRequest.Initiate.protoMessageName + ".CoinbaseStableSwapperClientParameters"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}from_mint\0\u{3}to_mint\0\u{3}swap_amount\0\u{3}funding_source\0\u{3}funding_id\0\u{3}destination_owner\0\u{3}fee_amount\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}from_mint\0\u{3}to_mint\0\u{3}swap_amount\0\u{3}funding_source\0\u{3}funding_id\0\u{3}destination_owner\0\u{3}fee_amount\0\u{3}swap_version\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -4772,6 +4782,7 @@ extension Ocp_Transaction_V1_StatefulSwapRequest.Initiate.CoinbaseStableSwapperC
       case 6: try { try decoder.decodeSingularStringField(value: &self.fundingID) }()
       case 7: try { try decoder.decodeSingularMessageField(value: &self._destinationOwner) }()
       case 8: try { try decoder.decodeSingularUInt64Field(value: &self.feeAmount) }()
+      case 9: try { try decoder.decodeSingularUInt32Field(value: &self.swapVersion) }()
       default: break
       }
     }
@@ -4806,6 +4817,9 @@ extension Ocp_Transaction_V1_StatefulSwapRequest.Initiate.CoinbaseStableSwapperC
     if self.feeAmount != 0 {
       try visitor.visitSingularUInt64Field(value: self.feeAmount, fieldNumber: 8)
     }
+    if self.swapVersion != 0 {
+      try visitor.visitSingularUInt32Field(value: self.swapVersion, fieldNumber: 9)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -4818,6 +4832,7 @@ extension Ocp_Transaction_V1_StatefulSwapRequest.Initiate.CoinbaseStableSwapperC
     if lhs.fundingID != rhs.fundingID {return false}
     if lhs._destinationOwner != rhs._destinationOwner {return false}
     if lhs.feeAmount != rhs.feeAmount {return false}
+    if lhs.swapVersion != rhs.swapVersion {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -5486,7 +5501,7 @@ extension Ocp_Transaction_V1_StatelessSwapRequest.Initiate: SwiftProtobuf.Messag
 
 extension Ocp_Transaction_V1_StatelessSwapRequest.Initiate.CoinbaseStableSwapperClientParameters: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = Ocp_Transaction_V1_StatelessSwapRequest.Initiate.protoMessageName + ".CoinbaseStableSwapperClientParameters"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}from_mint\0\u{3}to_mint\0\u{3}swap_amount\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}from_mint\0\u{3}to_mint\0\u{3}swap_amount\0\u{3}swap_version\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -5497,6 +5512,7 @@ extension Ocp_Transaction_V1_StatelessSwapRequest.Initiate.CoinbaseStableSwapper
       case 1: try { try decoder.decodeSingularMessageField(value: &self._fromMint) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._toMint) }()
       case 3: try { try decoder.decodeSingularUInt64Field(value: &self.swapAmount) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.swapVersion) }()
       default: break
       }
     }
@@ -5516,6 +5532,9 @@ extension Ocp_Transaction_V1_StatelessSwapRequest.Initiate.CoinbaseStableSwapper
     if self.swapAmount != 0 {
       try visitor.visitSingularUInt64Field(value: self.swapAmount, fieldNumber: 3)
     }
+    if self.swapVersion != 0 {
+      try visitor.visitSingularUInt32Field(value: self.swapVersion, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -5523,6 +5542,7 @@ extension Ocp_Transaction_V1_StatelessSwapRequest.Initiate.CoinbaseStableSwapper
     if lhs._fromMint != rhs._fromMint {return false}
     if lhs._toMint != rhs._toMint {return false}
     if lhs.swapAmount != rhs.swapAmount {return false}
+    if lhs.swapVersion != rhs.swapVersion {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

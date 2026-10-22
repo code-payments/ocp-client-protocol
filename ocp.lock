@@ -1,4 +1,4 @@
 # Pinned upstream contract. Regenerate with scripts/sync-protos.sh <sha>.
 upstream: code-payments/ocp-protobuf-api
-commit: 6f70c0d8e832531fd006bbb02fcb2c5d07e0c247
-subject: Add SendPublicMultiPaymentMetadata intent type (#70)
+commit: 98cf14de185d5abadf6f03b6802ff298f61610d0
+subject: Enable clients to migrate to Coinbase Stableswapper's v2 swap instruction (#71)
