@@ -8,6 +8,36 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.9.0
+
+Synced to [`ocp-protobuf-api@98cf14de`](https://github.com/code-payments/ocp-protobuf-api/commit/98cf14de185d5abadf6f03b6802ff298f61610d0),
+picking up [#71](https://github.com/code-payments/ocp-protobuf-api/pull/71). Only `transaction.v1` moved.
+
+Stablecoin swaps can now use CoinbaseStableSwapper's `swap_v2` instruction, which is `swap` without
+the deprecated whitelist account. The field is additive, so upgrading changes nothing until a client
+sets it.
+
+### Added
+
+- `swap_version` (`uint32`, at most 2) on the CoinbaseStableSwapper initiate parameters of
+  `StatefulSwapRequest` (field 9) and `StatelessSwapRequest` (field 4). Only `2` selects `swap_v2`.
+  Unset, `0` and `1` keep the legacy `swap` instruction.
+- The server builds the swap instruction from this field, and the client rebuilds and signs the
+  same transaction locally. A client that sends `2` has to build `swap_v2` itself: discriminator
+  `[43, 4, 237, 11, 26, 201, 30, 98]`, the same `amount_in` and `min_amount_out` args, and `swap`'s
+  accounts with the whitelist (index 12) removed. If the field and the local instruction disagree,
+  the swap fails.
+
+### Changed
+
+- Comments only: the CoinbaseStableSwapper server parameters on `StatefulSwapResponse` and
+  `StatelessSwapResponse` now list the swap step as `Swap` or `SwapV2`, per `swap_version`.
+
+### Unchanged
+
+Nothing was renumbered, and nothing existing changed type or meaning. No service, RPC, message or
+enum case was removed.
+
 ## 0.8.0
 
 Synced to [`ocp-protobuf-api@6f70c0d8`](https://github.com/code-payments/ocp-protobuf-api/commit/6f70c0d8e832531fd006bbb02fcb2c5d07e0c247),
