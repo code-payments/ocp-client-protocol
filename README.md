@@ -26,7 +26,11 @@ implementation("com.flipcash:ocp-client-protocol:0.3.0")
 `FlipcashAPI/Package.swift` and re-exports the module, so app code still reaches these types
 through `import FlipcashAPI`.
 
-The Kotlin artifact ships its own R8 keep rules, so an Android consumer needs no protobuf keep
+`com.flipcash:ocp-client-protocol-wire` carries the same messages as Wire classes for Kotlin
+Multiplatform (jvm, android, js/node, iosArm64, iosSimulatorArm64), with `validate()`, in
+`com.codeinc.opencode.wire.*`. It has no gRPC stubs. See [docs/generation.md](docs/generation.md#kotlin-multiplatform-wire).
+
+The protobuf-java artifact ships its own R8 keep rules, so an Android consumer needs no protobuf keep
 rule of its own.
 
 ## What it contains
@@ -66,6 +70,8 @@ Sources/OCPClientProtocol/   generated Swift, committed (SPM ships source)
 src/main/resources/
   META-INF/proguard/         R8 keep rules, shipped to Kotlin consumers
 build.gradle.kts             Kotlin generation + publishing
+wire/                        Wire messages for Kotlin Multiplatform (ocp-client-protocol-wire)
+kotlin-js-store/yarn.lock    npm lock for the Wire module's Node tests
 scripts/
   sync-protos.sh             pull upstream at a pinned SHA, re-namespace
   install-swift-toolchain.sh pinned generators into .tools/
