@@ -8,6 +8,55 @@ called out explicitly even when nothing else did.
 release notes, so a version with no entry here does not release. Write the entry in the same PR that
 syncs the contract, while the diff is still in front of you.
 
+## 0.11.0
+
+Synced to [`ocp-protobuf-api@1600673e`](https://github.com/code-payments/ocp-protobuf-api/commit/1600673e020427baaa1c75cd9306eb75fed9b300),
+picking up [#72](https://github.com/code-payments/ocp-protobuf-api/pull/72) and #73 (docs only).
+`common.v1` and `transaction.v1` moved.
+
+Swaps can now be built as v1 Solana transactions. The client opts in per swap through
+`transaction_version`. The server returns v1 parameters only to a client that asked for them, so an
+upgrade that leaves `transaction_version` unset changes nothing on the wire, and the signed
+`Initiate` bytes stay the same.
+
+### Added
+
+- `common.v1.SolanaTransactionConfig`: `compute_unit_limit` (1), `loaded_accounts_data_size_limit`
+  (2), `priority_fee_lamports` (3) and `heap_size` (4). A v1 transaction takes its compute budget
+  from this message instead of ComputeBudget instructions.
+- `transaction_version` (`uint32`, at most 1) on `StatefulSwapRequest.Initiate` (field 13) and
+  `StatelessSwapRequest.Initiate` (field 5). `0` or unset is v0 with ALTs, and `1` is v1. A client
+  that sends `1` must still handle v0 server parameters. Set it before signing: the `Initiate`
+  signature covers it.
+- `transaction_config` on the swap server parameters:
+  - `StatefulSwapResponse.ServerParameters.ReserveExistingCurrencyServerParameters` (field 11)
+  - `StatefulSwapResponse.ServerParameters.ReserveNewCurrencyServerParameter` (field 17)
+  - `StatefulSwapResponse.ServerParameters.CoinbaseStableSwapperServerParameter` (field 10)
+  - `StatelessSwapResponse.ServerParameters.CoinbaseStableSwapperServerParameter` (field 8)
+
+  When it is set, the transaction is built as v1 without ALTs, `alts` is empty, and
+  `compute_unit_limit` and `compute_unit_price` are 0.
+- On `ReserveNewCurrencyServerParameter`:
+  - `memory_accounts` (field 18, at most 8): `VmMemoryAccountInitialization` entries with
+    `address`, `name`, `num_accounts`, `account_size`, `resize_sizes` and `rent_top_up_lamports`.
+    The v1 transaction initializes, funds and resizes each one, in order.
+  - `fee_account_owner` (field 19, required): owner of the `to_mint` fee account, which the v1
+    transaction opens with `AssociatedTokenAccount::CreateIdempotent`.
+
+### Changed
+
+- `Transaction.value` allows up to 4096 bytes, up from 1232. Legacy and v0 transactions are still
+  limited to 1232.
+- Comments only:
+  - The swap instruction lists now cover v1.
+  - On a v1 new-currency buy paid with Core Mint, `swap_authority` must be a random one-time account
+    other than the owner.
+
+### Unchanged
+
+Nothing was renumbered, and nothing existing changed type or meaning. No service, RPC, message or
+enum case was removed.
+
 ## 0.10.0
 
 No contract change: the messages and services are the same as 0.9.0. This release adds a second
