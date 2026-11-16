@@ -11,7 +11,7 @@ syncs the contract, while the diff is still in front of you.
 ## 0.11.0
 
 Synced to [`ocp-protobuf-api@1600673e`](https://github.com/code-payments/ocp-protobuf-api/commit/1600673e020427baaa1c75cd9306eb75fed9b300),
-picking up [#72](https://github.com/code-payments/ocp-protobuf-api/pull/72) and #73 (docs only).
+picking up [#72](https://github.com/code-payments/ocp-protobuf-api/pull/72) and [#73](https://github.com/code-payments/ocp-protobuf-api/pull/73) (docs only).
 `common.v1` and `transaction.v1` moved.
 
 Swaps can now be built as v1 Solana transactions. The client opts in per swap through
