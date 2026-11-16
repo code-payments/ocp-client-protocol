@@ -160,13 +160,48 @@ public struct Ocp_Common_V1_SolanaAddressLookupTable: Sendable {
   fileprivate var _address: Ocp_Common_V1_SolanaAccountId? = nil
 }
 
+/// Fee and resource configuration for a Solana v1 transaction message
+/// (SIMD-0385). It replaces ComputeBudget instructions, which are ignored in
+/// v1 transactions.
+///
+/// The config is part of the signed message, so it must be encoded exactly:
+/// compute_unit_limit, loaded_accounts_data_size_limit and priority_fee_lamports
+/// are always present in the transaction config (including when
+/// priority_fee_lamports is 0), and heap_size is present only when non-zero.
+public struct Ocp_Common_V1_SolanaTransactionConfig: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The compute unit limit for the transaction
+  public var computeUnitLimit: UInt32 = 0
+
+  /// The loaded accounts data size limit for the transaction, in bytes
+  public var loadedAccountsDataSizeLimit: UInt32 = 0
+
+  /// The total priority fee for the transaction, in lamports. Unlike
+  /// ComputeBudget::SetComputeUnitPrice, this is not a per compute unit price.
+  public var priorityFeeLamports: UInt64 = 0
+
+  /// The requested heap size in bytes. When 0, it's omitted from the
+  /// transaction config and the runtime default is used. Otherwise, it must
+  /// be a multiple of 1024 between 32 KiB and 256 KiB.
+  public var heapSize: UInt32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 /// Transaction is a raw binary Solana transaction
 public struct Ocp_Common_V1_Transaction: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Maximum size taken from: https://github.com/solana-labs/solana/blob/39b3ac6a8d29e14faa1de73d8b46d390ad41797b/sdk/src/packet.rs#L9-L13
+  /// Maximum size is that of a v1 transaction taken from: https://github.com/solana-foundation/solana-improvement-documents/blob/main/proposals/0296-larger-transactions.md
+  ///
+  /// Note: Legacy and v0 transactions are limited to 1232 bytes.
   public var value: Data = Data()
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -456,6 +491,51 @@ extension Ocp_Common_V1_SolanaAddressLookupTable: SwiftProtobuf.Message, SwiftPr
   public static func ==(lhs: Ocp_Common_V1_SolanaAddressLookupTable, rhs: Ocp_Common_V1_SolanaAddressLookupTable) -> Bool {
     if lhs._address != rhs._address {return false}
     if lhs.entries != rhs.entries {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Ocp_Common_V1_SolanaTransactionConfig: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SolanaTransactionConfig"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}compute_unit_limit\0\u{3}loaded_accounts_data_size_limit\0\u{3}priority_fee_lamports\0\u{3}heap_size\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.computeUnitLimit) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.loadedAccountsDataSizeLimit) }()
+      case 3: try { try decoder.decodeSingularUInt64Field(value: &self.priorityFeeLamports) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.heapSize) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.computeUnitLimit != 0 {
+      try visitor.visitSingularUInt32Field(value: self.computeUnitLimit, fieldNumber: 1)
+    }
+    if self.loadedAccountsDataSizeLimit != 0 {
+      try visitor.visitSingularUInt32Field(value: self.loadedAccountsDataSizeLimit, fieldNumber: 2)
+    }
+    if self.priorityFeeLamports != 0 {
+      try visitor.visitSingularUInt64Field(value: self.priorityFeeLamports, fieldNumber: 3)
+    }
+    if self.heapSize != 0 {
+      try visitor.visitSingularUInt32Field(value: self.heapSize, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Ocp_Common_V1_SolanaTransactionConfig, rhs: Ocp_Common_V1_SolanaTransactionConfig) -> Bool {
+    if lhs.computeUnitLimit != rhs.computeUnitLimit {return false}
+    if lhs.loadedAccountsDataSizeLimit != rhs.loadedAccountsDataSizeLimit {return false}
+    if lhs.priorityFeeLamports != rhs.priorityFeeLamports {return false}
+    if lhs.heapSize != rhs.heapSize {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
